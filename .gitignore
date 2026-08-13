@@ -49,3 +49,6 @@ app.*.map.json
 *.sqlite
 *.sqlite3
 CarGo-db-export.db
+
+# Build artifacts (iOS ipa etc.)
+/dist/

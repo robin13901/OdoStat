@@ -1,0 +1,92 @@
+name: iOS Build
+
+# Manual trigger only — iOS builds use macOS runner minutes and are only
+# occasionally needed. Trigger from the Actions tab via "Run workflow" to get a
+# fresh unsigned .ipa.
+#
+# Produces a REAL unsigned .ipa (not just a .xcarchive): `flutter build ipa
+# --no-codesign` refuses to emit an .ipa ("Codesigning disabled ... skipping
+# IPA"), so we build the unsigned Runner.app and package it into Payload/
+# ourselves. The result installs via Sideloadly / AltStore, which re-sign it.
+#
+# Default configuration is release (OdoStat has no plugins that require a
+# debug/profile build). Android debug/release builds run locally on the dev
+# machine (`flutter build apk`).
+on:
+  workflow_dispatch:
+    inputs:
+      configuration:
+        description: 'Build configuration'
+        required: false
+        type: choice
+        default: 'release'
+        options:
+          - release
+          - profile
+
+jobs:
+  ios-build:
+    name: iOS (unsigned .ipa)
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.4
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Codegen (build_runner)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build iOS .app (unsigned)
+        # --no-codesign produces an unsigned Runner.app under
+        # build/ios/iphoneos/ — Sideloadly/AltStore re-sign on install.
+        env:
+          CONFIGURATION: ${{ inputs.configuration }}
+        run: |
+          set -euo pipefail
+          flutter build ios --"$CONFIGURATION" --no-codesign
+
+      - name: Package unsigned .ipa
+        # An .ipa is just a zip of Payload/<App>.app.
+        run: |
+          set -euo pipefail
+          APP_PATH=$(find build/ios/iphoneos -maxdepth 1 -name "*.app" -type d | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "::error::No .app found under build/ios/iphoneos"
+            ls -laR build/ios/iphoneos || true
+            exit 1
+          fi
+          echo "Found app: $APP_PATH"
+          SHA_SHORT="${GITHUB_SHA::7}"
+          mkdir -p dist Payload
+          cp -R "$APP_PATH" Payload/
+          zip -rq "dist/OdoStat-${SHA_SHORT}.ipa" Payload
+          rm -rf Payload
+          echo "Created dist/OdoStat-${SHA_SHORT}.ipa"
+          ls -lh dist/
+
+      - name: Upload iOS .ipa artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-unsigned-ipa
+          path: dist/*.ipa
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Build summary
+        if: always()
+        run: |
+          echo "## iOS Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Configuration:** ${{ inputs.configuration }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Signing:** Unsigned — re-sign locally with Sideloadly/AltStore" >> $GITHUB_STEP_SUMMARY
+          if ls dist/*.ipa >/dev/null 2>&1; then
+            IPA_PATH=$(find dist -name "*.ipa" -type f | head -1)
+            echo "- **IPA:** \`$(basename "$IPA_PATH")\` ($(ls -lh "$IPA_PATH" | awk '{print $5}'))" >> $GITHUB_STEP_SUMMARY
+          fi
