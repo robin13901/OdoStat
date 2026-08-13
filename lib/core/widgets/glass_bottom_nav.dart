@@ -10,10 +10,11 @@ class GlassNavDestination {
   final String label;
 }
 
-/// Stadium-shaped frosted-glass bottom navigation bar.
+/// Stadium-shaped frosted-glass bottom navigation pill.
 ///
-/// Floats above the content (the caller positions it with padding), mirroring
-/// the Trailblazer `BottomNavShell` look but adapted to OdoStat's tabs.
+/// Positioned by `AppShell` (which supplies SafeArea + padding and places it
+/// beside the FAB). Items expand to fill the available width; the selected one
+/// shows its label.
 class GlassBottomNav extends StatelessWidget {
   const GlassBottomNav({
     required this.currentIndex,
@@ -29,33 +30,25 @@ class GlassBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        child: Center(
-          child: GlassPill(
-            borderRadius: 999,
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(destinations.length, (i) {
-                final d = destinations[i];
-                final selected = i == currentIndex;
-                final color = selected
-                    ? AppColors.accent
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.55);
-                return _NavItem(
-                  icon: d.icon,
-                  label: d.label,
-                  color: color,
-                  selected: selected,
-                  onTap: () => onTap(i),
-                );
-              }),
-            ),
-          ),
-        ),
+    return GlassPill(
+      borderRadius: 999,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: List.generate(destinations.length, (i) {
+          final d = destinations[i];
+          final selected = i == currentIndex;
+          final color = selected
+              ? AppColors.accent
+              : theme.colorScheme.onSurface.withValues(alpha: 0.55);
+          return _NavItem(
+            icon: d.icon,
+            label: d.label,
+            color: color,
+            selected: selected,
+            onTap: () => onTap(i),
+          );
+        }),
       ),
     );
   }

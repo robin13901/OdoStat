@@ -50,13 +50,6 @@ class VehiclesScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(title: const Text('Fahrzeuge')),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => VehicleFormSheet.show(context),
-        backgroundColor: AppColors.accent,
-        foregroundColor: AppColors.onAccent,
-        icon: const Icon(Icons.add),
-        label: const Text('Fahrzeug'),
-      ),
       body: vehiclesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Fehler: $e')),

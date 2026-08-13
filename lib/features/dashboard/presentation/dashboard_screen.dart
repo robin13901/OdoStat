@@ -106,7 +106,7 @@ class _DashboardBody extends ConsumerWidget {
         );
 
         return ListView(
-          padding: const EdgeInsets.fromLTRB(0, 8, 0, 120),
+          padding: const EdgeInsets.fromLTRB(0, 8, 0, 130),
           children: [
             const VehicleSelector(),
             const SizedBox(height: 12),

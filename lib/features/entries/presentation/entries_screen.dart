@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:odostat/core/db/app_database.dart';
@@ -14,39 +12,17 @@ import 'package:odostat/features/entries/presentation/odometer_form_sheet.dart';
 import 'package:odostat/features/entries/presentation/refuel_form_sheet.dart';
 import 'package:odostat/features/vehicles/presentation/vehicle_providers.dart';
 
-/// Which list the entries screen currently shows.
-enum EntryTab { refuels, odometer }
-
-final _entryTabProvider = StateProvider<EntryTab>((ref) => EntryTab.refuels);
-
 class EntriesScreen extends ConsumerWidget {
   const EntriesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vehicle = ref.watch(selectedVehicleProvider);
-    final tab = ref.watch(_entryTabProvider);
+    final tab = ref.watch(entryTabProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(title: const Text('Einträge')),
-      floatingActionButton: vehicle == null
-          ? null
-          : FloatingActionButton.extended(
-              onPressed: () {
-                if (tab == EntryTab.refuels) {
-                  unawaited(RefuelFormSheet.show(context, vehicle: vehicle));
-                } else {
-                  unawaited(OdometerFormSheet.show(context, vehicle: vehicle));
-                }
-              },
-              backgroundColor: AppColors.accent,
-              foregroundColor: AppColors.onAccent,
-              icon: const Icon(Icons.add),
-              label: Text(tab == EntryTab.refuels
-                  ? (vehicle.propulsionType.isElectric ? 'Laden' : 'Tanken')
-                  : 'km-Stand'),
-            ),
       body: vehicle == null
           ? const EmptyState(
               icon: Icons.directions_car_rounded,
@@ -79,7 +55,7 @@ class EntriesScreen extends ConsumerWidget {
                     ],
                     selected: {tab},
                     onSelectionChanged: (s) =>
-                        ref.read(_entryTabProvider.notifier).state = s.first,
+                        ref.read(entryTabProvider.notifier).state = s.first,
                   ),
                 ),
                 const SizedBox(height: 8),
