@@ -43,3 +43,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local database files (real user data — never commit)
+*.db
+*.sqlite
+*.sqlite3
+CarGo-db-export.db
