@@ -1,0 +1,5 @@
+tags:
+  # Requires a real migrated database file via --dart-define=MIGRATED_DB=<path>.
+  # The test body self-skips when that define is empty, so it is inert in the
+  # default run and executes when the path is supplied.
+  migration:
