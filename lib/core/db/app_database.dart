@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:odostat/core/db/converters/enum_converters.dart';
@@ -10,6 +12,8 @@ import 'package:odostat/core/db/enums.dart';
 import 'package:odostat/core/db/tables/odometer_readings_table.dart';
 import 'package:odostat/core/db/tables/refuels_table.dart';
 import 'package:odostat/core/db/tables/vehicles_table.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 part 'app_database.g.dart';
 
@@ -40,6 +44,16 @@ class AppDatabase extends _$AppDatabase {
   );
 
   static QueryExecutor _openConnection() {
-    return driftDatabase(name: 'odostat');
+    return driftDatabase(name: _dbName);
+  }
+
+  /// The base name drift_flutter uses; the file is `$_dbName.sqlite` in the
+  /// application documents directory.
+  static const String _dbName = 'odostat';
+
+  /// Absolute path of the on-device SQLite file. Used by backup/restore.
+  static Future<File> databaseFile() async {
+    final dir = await getApplicationDocumentsDirectory();
+    return File(p.join(dir.path, '$_dbName.sqlite'));
   }
 }
