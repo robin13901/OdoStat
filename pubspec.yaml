@@ -55,6 +55,16 @@ dev_dependencies:
   drift_dev: ^2.34.5
   flutter_lints: ^6.0.0
   very_good_analysis: ^10.3.0
+  flutter_launcher_icons: 0.14.0
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png"
+  remove_alpha_ios: true
+  background_color_ios: "#0D1117"
+  adaptive_icon_background: "#0D1117"
+  adaptive_icon_foreground: "assets/icon/icon.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

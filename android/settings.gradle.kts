@@ -19,7 +19,10 @@ pluginManagement {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "9.0.1" apply false
+    // AGP pinned to 8.7 (down from Flutter's default 9.0.1): AGP 9 rejects the
+    // legacy `package=` attribute still present in some plugin manifests
+    // (e.g. file_picker 11), breaking the release build.
+    id("com.android.application") version "8.7.3" apply false
     id("org.jetbrains.kotlin.android") version "2.3.20" apply false
 }
 
