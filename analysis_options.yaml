@@ -1,0 +1,17 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.drift.dart"
+
+linter:
+  rules:
+    # App (not a published library): no public API docs required.
+    public_member_api_docs: false
+    # Drift table DSL and some UI lines exceed 80 chars routinely.
+    lines_longer_than_80_chars: false
+    # We keep the `flutter`/`flutter_test` SDK entries at the top of pubspec
+    # by convention; the rest is sorted alphabetically.
+    sort_pub_dependencies: false
