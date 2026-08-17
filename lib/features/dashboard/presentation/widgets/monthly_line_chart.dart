@@ -40,12 +40,53 @@ class MonthlyLineChart extends StatelessWidget {
       );
     }
 
+    final lineBarsData = [
+      for (final s in series)
+        LineChartBarData(
+          spots: [
+            for (final p in s.points)
+              if (p.value != null) FlSpot(p.month.toDouble(), p.value!),
+          ],
+          isCurved: true,
+          preventCurveOverShooting: true,
+          color: s.color,
+          barWidth: 3,
+          dotData: const FlDotData(show: false),
+          belowBarData: BarAreaData(
+            show: series.length == 1,
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                s.color.withValues(alpha: 0.25),
+                s.color.withValues(alpha: 0),
+              ],
+            ),
+          ),
+        ),
+    ];
+
+    double minY = double.infinity;
+    double maxY = double.negativeInfinity;
+    for (final barData in lineBarsData) {
+      for (final spot in barData.spots) {
+        if (spot.y < minY) minY = spot.y;
+        if (spot.y > maxY) maxY = spot.y;
+      }
+    }
+
+    final padding = (maxY - minY) * 0.05;
+    final chartMinY = minY - padding;
+    final chartMaxY = maxY + padding;
+
     return SizedBox(
       height: 220,
       child: LineChart(
         LineChartData(
           minX: 1,
           maxX: 12,
+          minY: chartMinY,
+          maxY: chartMaxY,
           gridData: FlGridData(
             drawVerticalLine: false,
             getDrawingHorizontalLine: (_) =>
@@ -59,10 +100,16 @@ class MonthlyLineChart extends StatelessWidget {
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 40,
-                getTitlesWidget: (value, meta) => Text(
-                  Fmt.decimal1(value),
-                  style: theme.textTheme.labelSmall,
-                ),
+                getTitlesWidget: (value, meta) {
+                  if ((value - meta.min).abs() < 0.001 ||
+                      (value - meta.max).abs() < 0.001) {
+                    return const SizedBox.shrink();
+                  }
+                  return Text(
+                    value.toStringAsFixed(0),
+                    style: theme.textTheme.labelSmall,
+                  );
+                },
               ),
             ),
             bottomTitles: AxisTitles(
@@ -83,31 +130,7 @@ class MonthlyLineChart extends StatelessWidget {
               ),
             ),
           ),
-          lineBarsData: [
-            for (final s in series)
-              LineChartBarData(
-                spots: [
-                  for (final p in s.points)
-                    if (p.value != null) FlSpot(p.month.toDouble(), p.value!),
-                ],
-                isCurved: true,
-                preventCurveOverShooting: true,
-                color: s.color,
-                barWidth: 3,
-                dotData: const FlDotData(show: false),
-                belowBarData: BarAreaData(
-                  show: series.length == 1,
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      s.color.withValues(alpha: 0.25),
-                      s.color.withValues(alpha: 0),
-                    ],
-                  ),
-                ),
-              ),
-          ],
+          lineBarsData: lineBarsData,
         ),
       ),
     );
