@@ -34,7 +34,7 @@ class EntriesScreen extends ConsumerWidget {
           else
             Column(
                   children: [
-                    const SizedBox(height: 100),
+                    const SizedBox(height: 108),
                     const VehicleSelector(),
                     const SizedBox(height: 8),
                     Padding(

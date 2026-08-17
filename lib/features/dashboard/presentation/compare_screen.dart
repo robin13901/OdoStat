@@ -65,7 +65,7 @@ class _CompareBody extends ConsumerWidget {
     final metric = ref.watch(_compareMetricProvider);
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 100, 16, 40),
+      padding: const EdgeInsets.fromLTRB(16, 108, 16, 40),
       children: [
         _SelectionCard(
           title: 'A',
