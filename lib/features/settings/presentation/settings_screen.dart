@@ -22,7 +22,7 @@ class SettingsScreen extends ConsumerWidget {
         body: Stack(
           children: [
             ListView(
-              padding: const EdgeInsets.fromLTRB(16, 76, 16, 40),
+              padding: const EdgeInsets.fromLTRB(16, 100, 16, 40),
               children: const [
                 _BackupSection(),
                 SizedBox(height: 16),

@@ -70,7 +70,7 @@ class VehiclesScreen extends ConsumerWidget {
                 );
               }
               return ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 76, 16, 120),
+                padding: const EdgeInsets.fromLTRB(16, 100, 16, 120),
                 itemCount: vehicles.length,
                 itemBuilder: (context, i) => _VehicleCard(
                   vehicle: vehicles[i],
