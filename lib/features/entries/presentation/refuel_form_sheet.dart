@@ -144,11 +144,12 @@ class _RefuelFormSheetState extends ConsumerState<RefuelFormSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
     final unit = _electric ? 'kWh' : 'l';
     final price = _unitPrice;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomInset),
+      padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomInset + bottomPadding),
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(
