@@ -6,6 +6,7 @@ import 'package:odostat/core/format/formatters.dart';
 import 'package:odostat/core/theme/app_colors.dart';
 import 'package:odostat/core/widgets/empty_state.dart';
 import 'package:odostat/core/widgets/glass_card.dart';
+import 'package:odostat/core/widgets/liquid_glass_widgets.dart';
 import 'package:odostat/features/vehicles/presentation/vehicle_form_sheet.dart';
 import 'package:odostat/features/vehicles/presentation/vehicle_providers.dart';
 
@@ -49,35 +50,39 @@ class VehiclesScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: const Text('Fahrzeuge')),
-      body: vehiclesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Fehler: $e')),
-        data: (vehicles) {
-          if (vehicles.isEmpty) {
-            return EmptyState(
-              icon: Icons.directions_car_rounded,
-              title: 'Noch keine Fahrzeuge',
-              subtitle: 'Lege dein erstes Fahrzeug an, um Tankvorgänge und '
-                  'Kilometerstände zu erfassen.',
-              action: FilledButton.icon(
-                onPressed: () => VehicleFormSheet.show(context),
-                icon: const Icon(Icons.add),
-                label: const Text('Fahrzeug anlegen'),
-              ),
-            );
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-            itemCount: vehicles.length,
-            itemBuilder: (context, i) => _VehicleCard(
-              vehicle: vehicles[i],
-              onEdit: () =>
-                  VehicleFormSheet.show(context, existing: vehicles[i]),
-              onDelete: () => _confirmDelete(context, ref, vehicles[i]),
-            ),
-          );
-        },
+      body: Stack(
+        children: [
+          vehiclesAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(child: Text('Fehler: $e')),
+            data: (vehicles) {
+              if (vehicles.isEmpty) {
+                return EmptyState(
+                  icon: Icons.directions_car_rounded,
+                  title: 'Noch keine Fahrzeuge',
+                  subtitle: 'Lege dein erstes Fahrzeug an, um Tankvorgänge und '
+                      'Kilometerstände zu erfassen.',
+                  action: FilledButton.icon(
+                    onPressed: () => VehicleFormSheet.show(context),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Fahrzeug anlegen'),
+                  ),
+                );
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 76, 16, 120),
+                itemCount: vehicles.length,
+                itemBuilder: (context, i) => _VehicleCard(
+                  vehicle: vehicles[i],
+                  onEdit: () =>
+                      VehicleFormSheet.show(context, existing: vehicles[i]),
+                  onDelete: () => _confirmDelete(context, ref, vehicles[i]),
+                ),
+              );
+            },
+          ),
+          buildLiquidGlassAppBar(context, title: const Text('Fahrzeuge'), showBackButton: false),
+        ],
       ),
     );
   }

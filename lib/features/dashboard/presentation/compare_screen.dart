@@ -5,6 +5,7 @@ import 'package:odostat/core/theme/app_colors.dart';
 import 'package:odostat/core/widgets/empty_state.dart';
 import 'package:odostat/core/widgets/glass_card.dart';
 import 'package:odostat/core/widgets/gradient_background.dart';
+import 'package:odostat/core/widgets/liquid_glass_widgets.dart';
 import 'package:odostat/features/dashboard/domain/stats_calculator.dart';
 import 'package:odostat/features/dashboard/presentation/dashboard_providers.dart';
 import 'package:odostat/features/dashboard/presentation/widgets/monthly_line_chart.dart';
@@ -34,14 +35,19 @@ class CompareScreen extends ConsumerWidget {
     return GradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(title: const Text('Vergleich')),
-        body: vehicles.isEmpty
-            ? const EmptyState(
+        body: Stack(
+          children: [
+            if (vehicles.isEmpty)
+              const EmptyState(
                 icon: Icons.compare_arrows_rounded,
                 title: 'Nichts zu vergleichen',
                 subtitle: 'Lege Fahrzeuge an und erfasse Daten.',
               )
-            : _CompareBody(vehicles: vehicles),
+            else
+              _CompareBody(vehicles: vehicles),
+            buildLiquidGlassAppBar(context, title: const Text('Vergleich')),
+          ],
+        ),
       ),
     );
   }
@@ -59,7 +65,7 @@ class _CompareBody extends ConsumerWidget {
     final metric = ref.watch(_compareMetricProvider);
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
+      padding: const EdgeInsets.fromLTRB(16, 76, 16, 40),
       children: [
         _SelectionCard(
           title: 'A',

@@ -6,6 +6,7 @@ import 'package:odostat/core/format/formatters.dart';
 import 'package:odostat/core/theme/app_colors.dart';
 import 'package:odostat/core/widgets/empty_state.dart';
 import 'package:odostat/core/widgets/glass_card.dart';
+import 'package:odostat/core/widgets/liquid_glass_widgets.dart';
 import 'package:odostat/core/widgets/vehicle_selector.dart';
 import 'package:odostat/features/entries/presentation/entry_providers.dart';
 import 'package:odostat/features/entries/presentation/odometer_form_sheet.dart';
@@ -22,50 +23,55 @@ class EntriesScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: const Text('Einträge')),
-      body: vehicle == null
-          ? const EmptyState(
+      body: Stack(
+        children: [
+          if (vehicle == null)
+            const EmptyState(
               icon: Icons.directions_car_rounded,
               title: 'Kein Fahrzeug',
               subtitle: 'Lege zuerst ein Fahrzeug an.',
             )
-          : Column(
-              children: [
-                const SizedBox(height: 8),
-                const VehicleSelector(),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: SegmentedButton<EntryTab>(
-                    segments: [
-                      ButtonSegment(
-                        value: EntryTab.refuels,
-                        label: Text(
-                          vehicle.propulsionType.isElectric
-                              ? 'Laden'
-                              : 'Tanken',
-                        ),
-                        icon: const Icon(Icons.local_gas_station_rounded),
+          else
+            Column(
+                  children: [
+                    const SizedBox(height: 76),
+                    const VehicleSelector(),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: SegmentedButton<EntryTab>(
+                        segments: [
+                          ButtonSegment(
+                            value: EntryTab.refuels,
+                            label: Text(
+                              vehicle.propulsionType.isElectric
+                                  ? 'Laden'
+                                  : 'Tanken',
+                            ),
+                            icon: const Icon(Icons.local_gas_station_rounded),
+                          ),
+                          const ButtonSegment(
+                            value: EntryTab.odometer,
+                            label: Text('Kilometer'),
+                            icon: Icon(Icons.speed_rounded),
+                          ),
+                        ],
+                        selected: {tab},
+                        onSelectionChanged: (s) =>
+                            ref.read(entryTabProvider.notifier).state = s.first,
                       ),
-                      const ButtonSegment(
-                        value: EntryTab.odometer,
-                        label: Text('Kilometer'),
-                        icon: Icon(Icons.speed_rounded),
-                      ),
-                    ],
-                    selected: {tab},
-                    onSelectionChanged: (s) =>
-                        ref.read(entryTabProvider.notifier).state = s.first,
-                  ),
+                    ),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: tab == EntryTab.refuels
+                          ? _RefuelList(vehicle: vehicle)
+                          : _OdometerList(vehicle: vehicle),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: tab == EntryTab.refuels
-                      ? _RefuelList(vehicle: vehicle)
-                      : _OdometerList(vehicle: vehicle),
-                ),
-              ],
-            ),
+          buildLiquidGlassAppBar(context, title: const Text('Einträge'), showBackButton: false),
+        ],
+      ),
     );
   }
 }

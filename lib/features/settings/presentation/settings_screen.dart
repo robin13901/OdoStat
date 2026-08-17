@@ -7,6 +7,7 @@ import 'package:odostat/core/theme/app_colors.dart';
 import 'package:odostat/core/theme/theme_mode_controller.dart';
 import 'package:odostat/core/widgets/glass_card.dart';
 import 'package:odostat/core/widgets/gradient_background.dart';
+import 'package:odostat/core/widgets/liquid_glass_widgets.dart';
 import 'package:odostat/features/settings/data/backup_service.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -18,15 +19,19 @@ class SettingsScreen extends ConsumerWidget {
     return GradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(title: const Text('Einstellungen')),
-        body: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
-          children: const [
-            _BackupSection(),
-            SizedBox(height: 16),
-            _ThemeSection(),
-            SizedBox(height: 16),
-            _AboutSection(),
+        body: Stack(
+          children: [
+            ListView(
+              padding: const EdgeInsets.fromLTRB(16, 76, 16, 40),
+              children: const [
+                _BackupSection(),
+                SizedBox(height: 16),
+                _ThemeSection(),
+                SizedBox(height: 16),
+                _AboutSection(),
+              ],
+            ),
+            buildLiquidGlassAppBar(context, title: const Text('Einstellungen')),
           ],
         ),
       ),

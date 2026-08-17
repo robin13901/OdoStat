@@ -6,6 +6,7 @@ import 'package:odostat/core/format/formatters.dart';
 import 'package:odostat/core/theme/app_colors.dart';
 import 'package:odostat/core/widgets/empty_state.dart';
 import 'package:odostat/core/widgets/glass_card.dart';
+import 'package:odostat/core/widgets/liquid_glass_widgets.dart';
 import 'package:odostat/core/widgets/vehicle_selector.dart';
 import 'package:odostat/features/dashboard/domain/period_stats.dart';
 import 'package:odostat/features/dashboard/domain/stats_calculator.dart';
@@ -28,25 +29,10 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: const Text('Analyse'),
-        actions: [
-          IconButton(
-            tooltip: 'Vergleich',
-            icon: const Icon(Icons.compare_arrows_rounded),
-            onPressed: () => Navigator.of(context, rootNavigator: true).push(
-              MaterialPageRoute<void>(builder: (_) => const CompareScreen()),
-            ),
-          ),
-          IconButton(
-            tooltip: 'Einstellungen',
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => context.push('/settings'),
-          ),
-        ],
-      ),
-      body: vehicle == null
-          ? EmptyState(
+      body: Stack(
+        children: [
+          if (vehicle == null)
+            EmptyState(
               icon: Icons.insights_rounded,
               title: 'Noch keine Daten',
               subtitle: 'Lege ein Fahrzeug an und erfasse Tankvorgänge und '
@@ -57,7 +43,29 @@ class DashboardScreen extends ConsumerWidget {
                 label: const Text('Zu den Fahrzeugen'),
               ),
             )
-          : _DashboardBody(vehicle: vehicle),
+          else
+            _DashboardBody(vehicle: vehicle),
+          buildLiquidGlassAppBar(
+            context,
+            title: const Text('Analyse'),
+            showBackButton: false,
+            actions: [
+              IconButton(
+                tooltip: 'Vergleich',
+                icon: const Icon(Icons.compare_arrows_rounded),
+                onPressed: () => Navigator.of(context, rootNavigator: true).push(
+                  MaterialPageRoute<void>(builder: (_) => const CompareScreen()),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Einstellungen',
+                icon: const Icon(Icons.settings_outlined),
+                onPressed: () => context.push('/settings'),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -106,7 +114,7 @@ class _DashboardBody extends ConsumerWidget {
         );
 
         return ListView(
-          padding: const EdgeInsets.fromLTRB(0, 8, 0, 130),
+          padding: const EdgeInsets.fromLTRB(0, 76, 0, 130),
           children: [
             const VehicleSelector(),
             const SizedBox(height: 12),
