@@ -7,6 +7,7 @@ import 'package:odostat/core/theme/app_colors.dart';
 import 'package:odostat/core/widgets/empty_state.dart';
 import 'package:odostat/core/widgets/glass_card.dart';
 import 'package:odostat/core/widgets/liquid_glass_widgets.dart';
+import 'package:odostat/core/widgets/vehicle_selector.dart';
 import 'package:odostat/features/vehicles/presentation/vehicle_form_sheet.dart';
 import 'package:odostat/features/vehicles/presentation/vehicle_providers.dart';
 
@@ -70,7 +71,7 @@ class VehiclesScreen extends ConsumerWidget {
                 );
               }
               return ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 108, 16, 120),
+                padding: const EdgeInsets.fromLTRB(16, 132, 16, 120),
                 itemCount: vehicles.length,
                 itemBuilder: (context, i) => _VehicleCard(
                   vehicle: vehicles[i],
@@ -81,7 +82,7 @@ class VehiclesScreen extends ConsumerWidget {
               );
             },
           ),
-          buildLiquidGlassAppBar(context, title: const Text('Fahrzeuge'), showBackButton: false),
+          buildLiquidGlassAppBar(context, title: const Text('Fahrzeuge'), showBackButton: false, vehicleSelector: const AppBarVehicleSelector()),
         ],
       ),
     );

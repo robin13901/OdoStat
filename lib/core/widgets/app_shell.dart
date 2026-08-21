@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:odostat/core/widgets/glass_bottom_nav.dart';
 import 'package:odostat/core/widgets/glass_fab.dart';
 import 'package:odostat/core/widgets/gradient_background.dart';
-import 'package:odostat/features/entries/presentation/entry_providers.dart';
 import 'package:odostat/features/entries/presentation/odometer_form_sheet.dart';
 import 'package:odostat/features/entries/presentation/refuel_form_sheet.dart';
 import 'package:odostat/features/vehicles/presentation/vehicle_form_sheet.dart';
@@ -19,8 +18,9 @@ import 'package:odostat/features/vehicles/presentation/vehicle_providers.dart';
 /// correctly over the backdrop and stay put across tab switches. The FAB's
 /// action depends on the active tab:
 ///   * Analyse (0): no FAB.
-///   * Einträge (1): add a refuel/charge or an odometer reading (per segment).
-///   * Fahrzeuge (2): add a vehicle.
+///   * Tanken (1): add a refuel/charge entry.
+///   * Kilometer (2): add an odometer reading.
+///   * Fahrzeuge (3): add a vehicle.
 class AppShell extends ConsumerWidget {
   const AppShell({required this.navigationShell, super.key});
 
@@ -28,29 +28,22 @@ class AppShell extends ConsumerWidget {
 
   static const _destinations = [
     GlassNavDestination(icon: Icons.insights_rounded, label: 'Analyse'),
-    GlassNavDestination(
-      icon: Icons.local_gas_station_rounded,
-      label: 'Einträge',
-    ),
+    GlassNavDestination(icon: Icons.local_gas_station_rounded, label: 'Tanken'),
+    GlassNavDestination(icon: Icons.speed_rounded, label: 'Kilometer'),
     GlassNavDestination(icon: Icons.directions_car_rounded, label: 'Fahrzeuge'),
   ];
 
   VoidCallback? _fabAction(BuildContext context, WidgetRef ref) {
     final index = navigationShell.currentIndex;
-    if (index == 2) {
-      return () => unawaited(VehicleFormSheet.show(context));
+    final vehicle = ref.watch(selectedVehicleProvider);
+    if (index == 3) return () => unawaited(VehicleFormSheet.show(context));
+    if (index == 1 && vehicle != null) {
+      return () => unawaited(RefuelFormSheet.show(context, vehicle: vehicle));
     }
-    if (index == 1) {
-      final vehicle = ref.watch(selectedVehicleProvider);
-      if (vehicle == null) return null;
-      final tab = ref.watch(entryTabProvider);
-      return () => unawaited(
-        tab == EntryTab.refuels
-            ? RefuelFormSheet.show(context, vehicle: vehicle)
-            : OdometerFormSheet.show(context, vehicle: vehicle),
-      );
+    if (index == 2 && vehicle != null) {
+      return () => unawaited(OdometerFormSheet.show(context, vehicle: vehicle));
     }
-    return null; // dashboard
+    return null;
   }
 
   @override
@@ -70,7 +63,7 @@ class AppShell extends ConsumerWidget {
               child: SafeArea(
                 top: false,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
                   child: Row(
                     children: [
                       Expanded(

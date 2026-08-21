@@ -9,16 +9,15 @@ import 'package:odostat/core/widgets/glass_card.dart';
 import 'package:odostat/core/widgets/liquid_glass_widgets.dart';
 import 'package:odostat/core/widgets/vehicle_selector.dart';
 import 'package:odostat/features/entries/presentation/entry_providers.dart';
-import 'package:odostat/features/entries/presentation/refuel_form_sheet.dart';
+import 'package:odostat/features/entries/presentation/odometer_form_sheet.dart';
 import 'package:odostat/features/vehicles/presentation/vehicle_providers.dart';
 
-class EntriesScreen extends ConsumerWidget {
-  const EntriesScreen({super.key});
+class OdometerScreen extends ConsumerWidget {
+  const OdometerScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vehicle = ref.watch(selectedVehicleProvider);
-
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
@@ -30,10 +29,10 @@ class EntriesScreen extends ConsumerWidget {
               subtitle: 'Lege zuerst ein Fahrzeug an.',
             )
           else
-            _RefuelList(vehicle: vehicle),
+            _OdometerList(vehicle: vehicle),
           buildLiquidGlassAppBar(
             context,
-            title: const Text('Tanken'),
+            title: const Text('Kilometer'),
             showBackButton: false,
             vehicleSelector: const AppBarVehicleSelector(),
           ),
@@ -43,44 +42,45 @@ class EntriesScreen extends ConsumerWidget {
   }
 }
 
-class _RefuelList extends ConsumerWidget {
-  const _RefuelList({required this.vehicle});
+class _OdometerList extends ConsumerWidget {
+  const _OdometerList({required this.vehicle});
 
   final Vehicle vehicle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(selectedVehicleRefuelsProvider);
-    final electric = vehicle.propulsionType.isElectric;
+    final async = ref.watch(selectedVehicleReadingsProvider);
 
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text('Fehler: $e')),
       data: (items) {
         if (items.isEmpty) {
-          return EmptyState(
-            icon: electric ? Icons.bolt_rounded : Icons.local_gas_station_rounded,
-            title: electric ? 'Keine Ladevorgänge' : 'Keine Tankvorgänge',
-            subtitle: 'Tippe auf +, um den ersten Eintrag zu erfassen.',
+          return const EmptyState(
+            icon: Icons.speed_rounded,
+            title: 'Keine Kilometerstände',
+            subtitle: 'Tippe auf +, um einen Kilometerstand zu erfassen.',
           );
         }
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
           itemCount: items.length,
           itemBuilder: (context, i) {
-            final r = items[i];
-            final unitPrice = r.amount > 0 ? r.cost / r.amount : 0.0;
+            final o = items[i];
+            // Distance since the previous (older) reading, if any.
+            final prev = i + 1 < items.length ? items[i + 1] : null;
+            final delta = prev != null ? o.value - prev.value : null;
             return GlassCard(
               margin: const EdgeInsets.only(bottom: 10),
-              onTap: () => RefuelFormSheet.show(
+              onTap: () => OdometerFormSheet.show(
                 context,
                 vehicle: vehicle,
-                existing: r,
+                existing: o,
               ),
               onLongPress: () => _confirmDelete(
                 context,
                 onConfirm: () =>
-                    ref.read(refuelDaoProvider).deleteRefuel(r.id),
+                    ref.read(odometerDaoProvider).deleteReading(o.id),
               ),
               child: Row(
                 children: [
@@ -89,37 +89,24 @@ class _RefuelList extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          Fmt.date(r.date),
+                          Fmt.km(o.value),
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${electric ? Fmt.kwh(r.amount) : Fmt.liters(r.amount)}'
-                          ' · ${r.fuelType.label}'
-                          '${r.isFull ? '' : ' · Teil'}',
+                          Fmt.date(o.date),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
                     ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        Fmt.euro(r.cost),
-                        style: Theme.of(context).textTheme.titleMedium,
+                  if (delta != null)
+                    Text(
+                      '+${Fmt.km(delta)}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.accent,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        electric
-                            ? Fmt.eurPerKwh(unitPrice)
-                            : Fmt.eurPerLiter(unitPrice),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.accent,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
                 ],
               ),
             );

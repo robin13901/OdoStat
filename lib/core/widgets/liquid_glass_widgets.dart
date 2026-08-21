@@ -13,7 +13,10 @@ LiquidGlassSettings getLiquidGlassSettings(BuildContext context) {
 }
 
 Widget buildLiquidGlassAppBar(BuildContext context,
-    {required Widget title, bool showBackButton = true, List<Widget>? actions}) {
+    {required Widget title,
+     bool showBackButton = true,
+     List<Widget>? actions,
+     Widget? vehicleSelector}) {
   final statusBar = MediaQuery.of(context).padding.top;
   final height = statusBar + kToolbarHeight;
   final settings = getLiquidGlassSettings(context);
@@ -56,7 +59,7 @@ Widget buildLiquidGlassAppBar(BuildContext context,
                           Theme.of(context).textTheme.titleLarge!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      child: title,
+                      child: vehicleSelector ?? title,
                     ),
                   ),
                   ...?actions,

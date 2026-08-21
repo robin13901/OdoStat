@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:odostat/core/widgets/app_shell.dart';
 import 'package:odostat/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:odostat/features/entries/presentation/entries_screen.dart';
+import 'package:odostat/features/entries/presentation/odometer_screen.dart';
 import 'package:odostat/features/settings/presentation/settings_screen.dart';
 import 'package:odostat/features/vehicles/presentation/vehicles_screen.dart';
 
@@ -11,8 +12,9 @@ final _rootKey = GlobalKey<NavigatorState>();
 /// Top-level GoRouter.
 ///
 ///   0: '/'          → DashboardScreen (analysis + charts)
-///   1: '/entries'   → EntriesScreen (refuels/charges + odometer readings)
-///   2: '/vehicles'  → VehiclesScreen (manage vehicles)
+///   1: '/entries'   → EntriesScreen (refuels/charges)
+///   2: '/odometer'  → OdometerScreen (odometer readings)
+///   3: '/vehicles'  → VehiclesScreen (manage vehicles)
 ///
 /// '/settings' is a separate top-level route reachable from the dashboard
 /// app bar (kept out of the bottom-nav pill).
@@ -42,6 +44,14 @@ final appRouter = GoRouter(
             GoRoute(
               path: '/entries',
               builder: (context, state) => const EntriesScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/odometer',
+              builder: (context, state) => const OdometerScreen(),
             ),
           ],
         ),

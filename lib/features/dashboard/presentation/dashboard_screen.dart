@@ -49,6 +49,7 @@ class DashboardScreen extends ConsumerWidget {
             context,
             title: const Text('Analyse'),
             showBackButton: false,
+            vehicleSelector: const AppBarVehicleSelector(),
             actions: [
               IconButton(
                 tooltip: 'Vergleich',
@@ -114,10 +115,8 @@ class _DashboardBody extends ConsumerWidget {
         );
 
         return ListView(
-          padding: const EdgeInsets.fromLTRB(0, 108, 0, 130),
+          padding: const EdgeInsets.fromLTRB(0, 132, 0, 130),
           children: [
-            const VehicleSelector(),
-            const SizedBox(height: 12),
             _YearSelector(
               years: years,
               selected: year,
@@ -226,27 +225,43 @@ class _YearSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: years.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (context, i) {
-          final y = years[i];
-          final isSel = y == selected;
-          return ChoiceChip(
-            label: Text('$y'),
-            selected: isSel,
-            onSelected: (_) => onSelected(y),
-            selectedColor: AppColors.accent.withValues(alpha: 0.22),
-            side: BorderSide(
-              color: isSel ? AppColors.accent : AppColors.hairline,
-            ),
-          );
-        },
-      ),
+    final idx = years.indexOf(selected);
+    // years sind absteigend sortiert (neuestes zuerst, Index 0)
+    // idx + 1 = älteres Jahr (linker Pfeil)
+    // idx - 1 = neueres Jahr (rechter Pfeil)
+    final canGoPrev = idx < years.length - 1;
+    final canGoNext = idx > 0;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.chevron_left_rounded),
+          onPressed: canGoPrev ? () => onSelected(years[idx + 1]) : null,
+          style: IconButton.styleFrom(
+            foregroundColor: canGoPrev
+                ? AppColors.accent
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '$selected',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconButton(
+          icon: const Icon(Icons.chevron_right_rounded),
+          onPressed: canGoNext ? () => onSelected(years[idx - 1]) : null,
+          style: IconButton.styleFrom(
+            foregroundColor: canGoNext
+                ? AppColors.accent
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+          ),
+        ),
+      ],
     );
   }
 }
